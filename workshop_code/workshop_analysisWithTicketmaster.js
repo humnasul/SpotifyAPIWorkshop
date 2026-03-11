@@ -67,16 +67,9 @@ async function getToken(code) {
   // This proves we're the legitimate app owner
   const auth = Buffer.from(`${client_id}:${client_secret}`).toString('base64');
   
-  return httpsRequest({
-    hostname: 'accounts.spotify.com', 
-    path: '/api/token',                    // Spotify's token endpoint
-    method: 'POST',
-    headers: {
-      'Authorization': `Basic ${auth}`,     // Include our app credentials
-      'Content-Type': 'application/x-www-form-urlencoded',
-      'Content-Length': Buffer.byteLength(body),
-    }
-  }, body);
+  // TODO: create the HTTPS request to Spotify's token endpoint
+  
+
   // Response contains: { access_token, token_type, expires_in, refresh_token }
 }
 
@@ -95,12 +88,8 @@ async function ticketmasterGet(artistName) {
     size: 3,                               // Return top 3 results
   });
   
-  return httpsRequest({
-    hostname: 'app.ticketmaster.com',
-    path: '/discovery/v2/events.json?' + qs.toString(),
-    method: 'GET',
-    headers: { 'Accept': 'application/json' }
-  });
+  // TODO: create the HTTPS request to Ticketmaster's search endpoint with the query parameters
+
   // Response contains: { _embedded: { events: [...] }, ... }
 }
 
@@ -110,14 +99,9 @@ async function ticketmasterGet(artistName) {
 // Make authenticated requests to Spotify's REST API
 // Uses Bearer token authentication (obtained from getToken())
 async function spotifyGet(path, token) {
-  return httpsRequest({
-    hostname: 'api.spotify.com', 
-    path,                                  // e.g. '/v1/me' or '/v1/me/top/tracks'
-    method: 'GET',
-    headers: { 
-      'Authorization': `Bearer ${token}`   // Include access token in header
-    }
-  });
+  // TODO: create the HTTPS request to Spotify's API endpoint with the access token
+  // response depends on the provided path for endpoint!
+
 }
 
 // building the amazing HTML page with the data we got from Spotify and Ticketmaster
@@ -311,17 +295,10 @@ http.createServer(async (req, res) => {
     const state = Math.random().toString(36).substring(2, 18);
     
     // Scopes define what permissions we're requesting
-    const scope = ['user-read-private', 'user-read-email', 'user-top-read'].join(' ');
+    // TODO: define the scope that we are using
     
     // Build the authorization URL that redirects to Spotify
-    const authUrl = 'https://accounts.spotify.com/authorize?' +
-      querystring.stringify({ 
-        response_type: 'code',               // Request an authorization code
-        client_id,                           // Our app ID
-        scope,                               // Requested permissions
-        redirect_uri,                        // Where to send user back
-        state                                // CSRF protection
-      });
+    // TODO: create authURL with the appropriate query parameters (client_id, response_type, redirect_uri, scope, state)
     
     // Redirect browser to Spotify's login/authorization page
     res.writeHead(302, { Location: authUrl });
@@ -353,12 +330,7 @@ http.createServer(async (req, res) => {
       // ========================================
       // API CALLS 2 & 3: FETCH USER DATA (in parallel)
       // ========================================
-      const [profileRes, topRes] = await Promise.all([
-        // Get user's profile info (name, followers, subscription type, etc)
-        spotifyGet('/v1/me', access_token),
-        // Get user's top 15 tracks from short term (last 4 weeks)
-        spotifyGet('/v1/me/top/tracks?limit=15&time_range=short_term', access_token),
-      ]);
+      // TODO: API calls to get Spotify data!
 
       if (profileRes.status !== 200) throw new Error('Could not fetch profile');
       if (topRes.status !== 200) throw new Error('Could not fetch top tracks');
